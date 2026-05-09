@@ -1,0 +1,460 @@
+:root {
+  color-scheme: dark;
+  --bg: #050505;
+  --text: #f5f3ee;
+  --muted: rgba(245, 243, 238, 0.74);
+  --faint: rgba(245, 243, 238, 0.18);
+  --spotify: #1ed760;
+  --offline: #f1f1ef;
+  --offline-text: #151515;
+  --album-bg: linear-gradient(135deg, #1ed760, #191414);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+body::before,
+body::after {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+body::before {
+  z-index: -2;
+  background-image: var(--album-bg);
+  background-position: center;
+  background-size: cover;
+  filter: blur(6px) saturate(1.28);
+  opacity: 0.82;
+  transform: scale(1.16);
+  transition:
+    background-image 450ms ease,
+    opacity 450ms ease;
+}
+
+body::after {
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.66) 58%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.42)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18), #050505 100%);
+}
+
+.site-topbar,
+.site-footer {
+  position: fixed;
+  z-index: 10;
+  left: clamp(1rem, 4vw, 3.2rem);
+  right: clamp(1rem, 4vw, 3.2rem);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 1rem;
+  font-size: clamp(0.72rem, 1vw, 0.84rem);
+  font-weight: 400;
+  line-height: 1.08;
+  text-transform: uppercase;
+}
+
+.site-topbar {
+  top: clamp(1rem, 4vw, 2.2rem);
+}
+
+.site-footer {
+  bottom: clamp(1rem, 4vw, 2rem);
+  align-items: end;
+}
+
+.brand-name,
+.text-link,
+.website-link {
+  color: var(--text);
+  font-weight: 400;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.16em;
+}
+
+.brand-name {
+  justify-self: start;
+  text-decoration: none;
+}
+
+.text-link,
+.website-link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.12em;
+}
+
+.presence-badge {
+  justify-self: center;
+  min-width: 4.35rem;
+  padding: 0.28rem 0.5rem 0.24rem;
+  border-radius: 5px;
+  color: var(--offline-text);
+  background: var(--offline);
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.presence-badge.is-online {
+  color: #021008;
+  background: var(--spotify);
+}
+
+.presence-badge.is-offline {
+  color: var(--offline-text);
+  background: var(--offline);
+}
+
+.location-time {
+  justify-self: end;
+  display: grid;
+  gap: 0.2rem;
+  text-align: right;
+}
+
+.location-time time {
+  color: var(--text);
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(6rem, 14vh, 9rem) clamp(1rem, 4vw, 3rem);
+}
+
+.player {
+  width: min(520px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.art-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  width: min(300px, 70vw);
+  height: auto;
+  overflow: hidden;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--spotify), #191414);
+  box-shadow: 0 34px 92px rgba(0, 0, 0, 0.58);
+}
+
+.album-art,
+.art-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.album-art {
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.album-art.is-loaded {
+  opacity: 1;
+}
+
+.art-fallback {
+  display: grid;
+  place-items: center;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: clamp(3.2rem, 20vw, 7rem);
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.art-fallback[hidden] {
+  display: none;
+}
+
+.track-copy {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.34rem;
+}
+
+.status-row {
+  order: -2;
+  display: flex;
+  gap: 0.42rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 1rem;
+}
+
+.equalizer {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 3px);
+  gap: 3px;
+  align-items: end;
+  width: 15px;
+  height: 12px;
+  transform: translateY(-0.02em);
+}
+
+.equalizer span {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--text);
+  opacity: 0.48;
+}
+
+.player.is-playing .equalizer span {
+  background: var(--spotify);
+  opacity: 1;
+  animation: bounce 820ms ease-in-out infinite;
+}
+
+.player.is-playing .equalizer span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.player.is-playing .equalizer span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.5rem, 2vw, 0.6rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.song-title {
+  margin: 0;
+  max-width: min(22ch, 100%);
+  color: var(--text);
+  font-size: clamp(1.85rem, 5vw, 1.5rem);
+  font-weight: 760;
+  line-height: 0.96;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+
+.artist,
+.album {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 2.4vw, 1.1rem);
+  font-weight: 400;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.artist {
+  order: -1;
+  margin-top: 0.15rem;
+}
+
+.album {
+  margin-top: 0;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  color: rgba(245, 243, 238, 0.62);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.65rem;
+}
+
+.spotify-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.55rem;
+  padding: 0.45rem 0.85rem;
+  border: 2px solid var(--text);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  font-weight: 400;
+  text-decoration: none;
+  text-transform: none;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.spotify-link:hover {
+  color: #050505;
+  background: var(--text);
+  transform: scale(1.04);
+}
+
+.spotify-link[hidden] {
+  display: none;
+}
+
+.explicit {
+  padding: 0.28rem 0.45rem;
+  border-radius: 2px;
+  color: #000;
+  background: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.about-wrap {
+  position: relative;
+  justify-self: center;
+  grid-column: 2;
+}
+
+.text-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.website-link {
+  justify-self: end;
+}
+
+.about-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.85rem);
+  z-index: 20;
+  width: min(504px, calc(100vw - 2rem));
+  max-height: min(70vh, 420px);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid var(--faint);
+  border-radius: 8px;
+  color: var(--text);
+  background: rgba(10, 10, 10, 0.94);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.48);
+  transform: translateX(-50%);
+  text-transform: none;
+}
+
+.about-popover h2 {
+  margin: 0 0 0.55rem;
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.about-popover p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.about-popover a {
+  color: var(--text);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+}
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    height: 3px;
+  }
+
+  50% {
+    height: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-topbar,
+  .site-footer {
+    left: 1rem;
+    right: 1rem;
+    grid-template-columns: 1fr auto 1fr;
+    row-gap: 0.9rem;
+  }
+
+  .presence-badge {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+  }
+
+  .location-time {
+    grid-column: 3;
+  }
+
+  .page-shell {
+    align-items: center;
+    padding: 8.5rem 1rem 7.5rem;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .about-wrap {
+    grid-column: auto;
+    justify-self: center;
+  }
+
+  .website-link {
+    justify-self: center;
+  }
+
+  .about-popover {
+    width: min(432px, calc(100vw - 2rem));
+    bottom: calc(100% + 0.75rem);
+  }
+
+  .song-title {
+    max-width: 100%;
+    font-size: clamp(1.26rem, 7vw, 2.1rem);
+  }
+}

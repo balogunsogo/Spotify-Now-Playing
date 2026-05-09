@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Now Playing</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://i.scdn.co" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-topbar" aria-label="Site status">
+      <a class="brand-name" href="https://balogunoluwasogo.webflow.io/" target="_blank" rel="noreferrer">
+        Oluwasogo<br />Balogun
+      </a>
+
+      <div id="presence-badge" class="presence-badge is-offline">Offline</div>
+
+      <div class="location-time" aria-label="Current time in Lagos, Nigeria">
+        <span>Lagos, NG</span>
+        <time id="lagos-time" datetime="">--:-- WAT</time>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section id="player" class="player" aria-live="polite">
+        <div class="art-wrap">
+          <img id="album-art" class="album-art" alt="" />
+          <div id="art-fallback" class="art-fallback" hidden>SP</div>
+        </div>
+
+        <div class="track-copy">
+          <div class="status-row">
+            <span class="equalizer" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <p id="status" class="status">Connecting to Spotify</p>
+          </div>
+          <p id="title" class="song-title">Loading...</p>
+          <p id="artist" class="artist"></p>
+          <p id="album" class="album"></p>
+
+          <div class="actions">
+            <a id="spotify-link" class="spotify-link" href="#" target="_blank" rel="noreferrer">
+              Open in Spotify
+            </a>
+            <span id="explicit" class="explicit" hidden>Explicit</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="about-wrap">
+        <button
+          id="about-toggle"
+          class="text-link"
+          type="button"
+          aria-expanded="false"
+          aria-controls="about-popover"
+        >
+          What is this?
+        </button>
+        <div id="about-popover" class="about-popover" role="dialog" aria-label="About this website" hidden>
+          <p>
+            Hi, I’m Andy, a developer and designer based in Lagos, Nigeria, creating thoughtful
+            digital experiences across web and mobile. Music is always part of that process -
+            it helps me focus, think, and stay in the zone while I work. This is a small window into
+            what’s usually playing in the background while I build.</a>.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <div id="modal-scrim" class="modal-scrim" hidden></div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
