@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getListeningStatus } from "./lib/spotify.js";
+import spotifyCallback from "./api/spotify/callback.js";
+import spotifyLogin from "./api/spotify/login.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "public");
@@ -60,6 +62,23 @@ function sendJson(response, status, data) {
   response.end(JSON.stringify(data));
 }
 
+function addApiResponseHelpers(response) {
+  response.status = (status) => {
+    response.statusCode = status;
+    return response;
+  };
+  response.json = (data) => {
+    response.setHeader("Content-Type", "application/json; charset=utf-8");
+    response.end(JSON.stringify(data));
+    return response;
+  };
+  response.redirect = (status, location) => {
+    response.writeHead(status, { Location: location });
+    response.end();
+  };
+  return response;
+}
+
 async function serveStatic(request, response) {
   const requestPath = new URL(request.url, `http://${request.headers.host}`).pathname;
   const safePath = path.normalize(decodeURIComponent(requestPath)).replace(/^(\.\.[/\\])+/, "");
@@ -90,6 +109,18 @@ async function serveStatic(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    const pathname = new URL(request.url, "http://127.0.0.1").pathname;
+
+    if (pathname === "/api/spotify/login") {
+      await spotifyLogin(request, addApiResponseHelpers(response));
+      return;
+    }
+
+    if (pathname === "/api/spotify/callback") {
+      await spotifyCallback(request, addApiResponseHelpers(response));
+      return;
+    }
+
     if (request.url?.startsWith("/api/spotify")) {
       sendJson(response, 200, await getListeningStatus());
       return;
