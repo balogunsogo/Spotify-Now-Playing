@@ -31,13 +31,21 @@
   <meta name="twitter:description" content="See what’s currently playing on my Spotify" />
   <meta name="twitter:image" content="https://balogunoluwasogo-now-playing.vercel.app/og-image.png" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://i.scdn.co" />
+  <link rel="preconnect" href="https://i.scdn.co" crossorigin />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/experiments.css" />
 </head>
 
 
 
 <body>
+  <div id="ambient-scene" class="ambient-scene" aria-hidden="true">
+    <div id="ambient-layer-a" class="ambient-layer is-active"></div>
+    <div id="ambient-layer-b" class="ambient-layer"></div>
+    <div class="ambient-grain"></div>
+    <div class="ambient-shade"></div>
+  </div>
+
   <header class="site-topbar" aria-label="Site status">
     <a class="brand-name" href="https://balogunoluwasogo.webflow.io/" target="_blank" rel="noreferrer">
       Oluwasogo<br />Balogun
@@ -52,10 +60,20 @@
   </header>
 
   <main class="page-shell">
-    <section id="player" class="player" aria-live="polite">
-      <div class="art-wrap">
-        <img id="album-art" class="album-art" alt="" />
-        <div id="art-fallback" class="art-fallback" hidden>SP</div>
+    <section id="player" class="player is-offline" aria-live="polite">
+      <div class="art-stage">
+        <div class="art-wrap">
+          <img
+            id="album-art"
+            class="album-art"
+            alt=""
+            crossorigin="anonymous"
+            decoding="async"
+            fetchpriority="high"
+          />
+          <span id="art-fallback" class="art-fallback" hidden>SP</span>
+          <span class="art-reflection" aria-hidden="true"></span>
+        </div>
       </div>
 
       <div class="track-copy">
@@ -67,13 +85,14 @@
           </span>
           <p id="status" class="status">Connecting to Spotify</p>
         </div>
+
         <p id="title" class="song-title">Loading...</p>
         <p id="artist" class="artist"></p>
         <p id="album" class="album"></p>
 
         <div class="actions">
           <a id="spotify-link" class="spotify-link" href="#" target="_blank" rel="noreferrer">
-            Open in Spotify
+            <span>Open in Spotify</span>
           </a>
           <span id="explicit" class="explicit" hidden>Explicit</span>
         </div>
@@ -95,18 +114,37 @@
         <span aria-hidden="true">i</span>
       </button>
       <div id="about-popover" class="about-popover" role="dialog" aria-label="About this website" hidden>
+        <h2>Live Now Playing</h2>
         <p>
-          Hi, I’m Andy, a developer and designer based in Lagos, Nigeria, creating thoughtful
-          digital experiences across web and mobile. Music is always part of that process -
-          it helps me focus, think, and stay in the zone while I work. This is a small window into
-          what’s usually playing in the background while I build.
+          A live window into what I’m listening to on Spotify - synced in real time through the Spotify Web API.
         </p>
       </div>
     </div>
+
+    <button
+      id="previous-toggle"
+      class="info-button previous-toggle"
+      type="button"
+      aria-label="Previously played"
+      aria-expanded="false"
+      aria-controls="previous-drawer"
+      title="Previously played"
+    >
+      <span class="history-icon" aria-hidden="true"></span>
+    </button>
   </footer>
+
+  <aside id="previous-drawer" class="previous-drawer" aria-label="Previously observed tracks" hidden>
+    <div class="previous-drawer-head">
+      <span>Previously</span>
+      <button id="previous-close" type="button" aria-label="Close previous tracks">Close</button>
+    </div>
+    <div id="previous-list" class="previous-list"></div>
+  </aside>
 
   <div id="modal-scrim" class="modal-scrim" hidden></div>
 
+  <script src="/experiments.js" type="module"></script>
   <script src="/app.js" type="module"></script>
 </body>
 

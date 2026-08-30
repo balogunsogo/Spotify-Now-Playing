@@ -25,7 +25,7 @@ Then open:
 http://127.0.0.1:3000
 ```
 
-The page polls `/api/spotify` every 5 seconds. When Spotify reports an active track, the page shows it as currently playing. When nothing is active, it requests the latest recently played track instead.
+The page polls `/api/spotify` every 12 seconds while the page is visible. When Spotify reports an active track, the page shows it as currently playing. When nothing is active, it requests the latest recently played track instead.
 
 ## Vercel Deployment
 
@@ -48,6 +48,7 @@ Do not commit `.env` or `.env.local`.
 This project expects a long-lived Spotify refresh token with these scopes:
 
 - `user-read-currently-playing`
+- `user-read-playback-state`
 - `user-read-recently-played`
 
 Keep the refresh token and client secret server-side only.

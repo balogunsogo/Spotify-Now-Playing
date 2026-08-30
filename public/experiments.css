@@ -1,0 +1,430 @@
+/* Experimental layers are intentionally isolated in this file for easy removal. */
+
+:root {
+  --base-rgb: 22, 22, 24;
+}
+
+/* EXPERIMENT: Ambient background */
+.ambient-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    repeating-radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.035) 0 0.45px, transparent 0.7px 3px),
+    repeating-linear-gradient(112deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 4px);
+  background-size: 4px 4px, 7px 7px;
+  mix-blend-mode: soft-light;
+  opacity: 0.22;
+}
+
+.ambient-shade {
+  z-index: 3;
+}
+
+body[data-playback-state="paused"] .ambient-grain,
+body[data-playback-state="offline"] .ambient-grain {
+  opacity: 0.12;
+}
+
+/* EXPERIMENT: Artwork depth and reflection */
+.art-wrap {
+  --art-lift: 0px;
+  --reflection-shift: 0%;
+  --reflection-opacity: 0.12;
+  transform:
+    translate3d(0, var(--art-lift), 0)
+    perspective(900px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+}
+
+.art-reflection {
+  position: absolute;
+  inset: -35% -65%;
+  z-index: 4;
+  background: linear-gradient(
+    108deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.03) 43%,
+    rgba(255, 255, 255, 0.18) 49%,
+    rgba(255, 255, 255, 0.035) 55%,
+    transparent 64%
+  );
+  opacity: var(--reflection-opacity);
+  transform: translate3d(var(--reflection-shift), 0, 0);
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+
+.player.is-paused .art-reflection,
+.player.is-offline .art-reflection {
+  opacity: 0.04;
+}
+
+/* EXPERIMENT: Staged track arrival */
+.track-copy,
+.art-stage {
+  transition:
+    opacity 180ms ease,
+    filter 220ms ease,
+    transform 260ms var(--ease-cinematic);
+}
+
+.player.is-departing .track-copy {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(-5px);
+}
+
+.player.is-departing .art-stage {
+  opacity: 0;
+  filter: saturate(0.72);
+  animation: none;
+  transform: translateY(4px) scale(0.975);
+}
+
+/* EXPERIMENT: Editorial typography */
+.song-title {
+  font-size: clamp(1.48rem, 4.2vw, 2.05rem);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.song-title.is-short-title {
+  max-width: min(18ch, 100%);
+  font-size: clamp(1.85rem, 5.3vw, 2.55rem);
+  line-height: 0.9;
+}
+
+.song-title.is-long-title {
+  max-width: min(27ch, 100%);
+  font-size: clamp(1.2rem, 3.15vw, 1.58rem);
+  line-height: 1;
+}
+
+.title-word {
+  display: inline-block;
+}
+
+.is-word-revealing .title-word {
+  animation: experimental-word-reveal 420ms var(--ease-cinematic) both;
+  animation-delay: calc(var(--word-index) * 26ms + 60ms);
+}
+
+.artist {
+  letter-spacing: 0.025em;
+}
+
+.album {
+  letter-spacing: 0.11em;
+}
+
+.track-copy {
+  gap: 0.28rem;
+}
+
+.actions {
+  margin-top: 0.52rem;
+}
+
+/* EXPERIMENT: Local previous-track drawer */
+.previous-toggle {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.previous-toggle[aria-expanded="true"] {
+  border-color: var(--text);
+  color: var(--text);
+  background: rgba(245, 243, 238, 0.1);
+}
+
+.previous-toggle .history-icon {
+  position: relative;
+  display: block;
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 1.35px solid currentColor;
+  border-left-color: transparent;
+  border-radius: 50%;
+  transform: translateY(-0.01em) rotate(-32deg);
+}
+
+.previous-toggle .history-icon::before {
+  position: absolute;
+  top: -0.16rem;
+  left: -0.13rem;
+  width: 0;
+  height: 0;
+  border-top: 0.18rem solid transparent;
+  border-bottom: 0.18rem solid transparent;
+  border-right: 0.25rem solid currentColor;
+  content: "";
+}
+
+.previous-drawer {
+  position: fixed;
+  z-index: 28;
+  left: 50%;
+  bottom: clamp(3.5rem, 7vh, 5rem);
+  width: min(750px, calc(100vw - 3rem));
+  padding: 1.08rem;
+  border: 1px solid rgba(245, 243, 238, 0.11);
+  border-radius: 10px;
+  background: rgba(8, 8, 8, 0.82);
+  box-shadow: 0 22px 72px rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(18px);
+  transform: translateX(-50%);
+  animation: experimental-drawer-in 280ms var(--ease-cinematic) both;
+}
+
+.previous-drawer[hidden] {
+  display: none;
+}
+
+.previous-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.87rem;
+  color: rgba(245, 243, 238, 0.66);
+  font-size: 0.87rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.previous-drawer-head button {
+  border: 0;
+  padding: 0.16rem 0.22rem;
+  color: rgba(245, 243, 238, 0.5);
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.previous-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.82rem;
+}
+
+.previous-track {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0.5rem;
+  padding: 0;
+  border-radius: 3px;
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms var(--ease-cinematic);
+}
+
+.previous-track:hover,
+.previous-track:focus-visible {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.previous-track img,
+.previous-art-fallback {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.previous-art-fallback {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(var(--base-rgb), 0.9);
+  font-size: 0.98rem;
+}
+
+.previous-track-copy {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+  opacity: 0.58;
+  transition: opacity 180ms ease;
+}
+
+.previous-track:hover .previous-track-copy,
+.previous-track:focus-visible .previous-track-copy {
+  opacity: 0.92;
+}
+
+.previous-track strong,
+.previous-track small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previous-track strong {
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+
+.previous-track small {
+  color: rgba(245, 243, 238, 0.46);
+  font-size: 0.72rem;
+}
+
+.previous-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.05rem 0.3rem;
+  color: rgba(245, 243, 238, 0.46);
+  font-size: 0.84rem;
+}
+
+/* EXPERIMENT: Desktop idle atmosphere */
+.site-topbar,
+.site-footer {
+  transition: opacity 520ms var(--ease-cinematic);
+}
+
+.is-idle .site-topbar,
+.is-idle .site-footer {
+  opacity: 0.24;
+}
+
+.is-idle .track-copy {
+  opacity: 0.48;
+}
+
+.is-idle .art-stage {
+  animation: none;
+  transform: translateY(-3px) scale(1.035);
+}
+
+.is-idle .ambient-layer.is-active {
+  opacity: 0.91;
+  filter: blur(15px) saturate(0.98) brightness(0.61);
+}
+
+/* EXPERIMENT: Reversible status double-click afterglow */
+.is-afterglow .ambient-layer.is-active {
+  filter: blur(14px) saturate(1.08) brightness(0.66);
+}
+
+.is-afterglow .ambient-grain {
+  opacity: 0.34;
+}
+
+.is-afterglow .art-wrap {
+  box-shadow:
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) rgba(0, 0, 0, 0.44),
+    0 0 72px rgba(var(--accent-rgb), 0.12);
+}
+
+@keyframes experimental-word-reveal {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(0.72em);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes experimental-drawer-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 720px) {
+  .previous-drawer {
+    bottom: 4.2rem;
+    width: min(560px, calc(100vw - 1.2rem));
+    padding: 0.82rem;
+    border-radius: 8px;
+  }
+
+  .previous-drawer-head {
+    margin-bottom: 0.68rem;
+    font-size: 0.7rem;
+  }
+
+  .previous-drawer-head button {
+    font-size: 0.62rem;
+  }
+
+  .previous-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 118px;
+    gap: 0.65rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .previous-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .previous-track {
+    gap: 0.4rem;
+  }
+
+  .previous-track strong {
+    font-size: 0.72rem;
+  }
+
+  .previous-track small {
+    font-size: 0.58rem;
+  }
+
+  .track-copy {
+    gap: 0.22rem;
+  }
+
+  .actions {
+    margin-top: 0.42rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .song-title.is-short-title {
+    font-size: clamp(1.68rem, 8.8vw, 2.2rem);
+  }
+
+  .song-title.is-long-title {
+    font-size: clamp(1.12rem, 5.4vw, 1.42rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-reflection {
+    display: none;
+  }
+
+  .title-word,
+  .previous-drawer {
+    animation: none !important;
+  }
+
+  .is-idle .art-stage {
+    transform: none;
+  }
+}
