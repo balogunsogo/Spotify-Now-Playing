@@ -6,7 +6,6 @@ const previousToggle = document.querySelector("#previous-toggle");
 const previousDrawer = document.querySelector("#previous-drawer");
 const previousClose = document.querySelector("#previous-close");
 const previousList = document.querySelector("#previous-list");
-const pageShell = document.querySelector(".page-shell");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 const RECENT_STORAGE_KEY = "spotify-now-playing:experimental-recents";
@@ -16,7 +15,6 @@ const IDLE_DELAY_MS = 6500;
 let currentTrack = null;
 let idleTimer = null;
 let titleRevealTimer = null;
-let touchStart = null;
 let lastPlaybackObservedAt = null;
 let offlineStatusTimer = null;
 let lastActivityAt = performance.now();
@@ -141,8 +139,13 @@ function renderRecentTracks(tracks = readRecentTracks()) {
 function rememberPreviousTrack(nextTrack, trackChanged) {
   if (!trackChanged) return;
 
+  const existing = readRecentTracks();
+  const nextIdentity = trackIdentity(nextTrack);
+  let stored = existing.filter((track) => trackIdentity(track) !== nextIdentity);
+  let historyChanged = stored.length !== existing.length;
+
   if (currentTrack && trackIdentity(currentTrack) !== trackIdentity(nextTrack)) {
-    const stored = readRecentTracks().filter((track) => trackIdentity(track) !== trackIdentity(currentTrack));
+    stored = stored.filter((track) => trackIdentity(track) !== trackIdentity(currentTrack));
     stored.unshift({
       title: currentTrack.title,
       artists: currentTrack.artists,
@@ -150,6 +153,10 @@ function rememberPreviousTrack(nextTrack, trackChanged) {
       albumArt: currentTrack.albumArt,
       spotifyUrl: currentTrack.spotifyUrl
     });
+    historyChanged = true;
+  }
+
+  if (historyChanged) {
     writeRecentTracks(stored);
     if (!previousDrawer.hidden) renderRecentTracks(stored);
   }
@@ -165,30 +172,6 @@ function setPreviousOpen(isOpen) {
 
 previousToggle.addEventListener("click", () => setPreviousOpen(previousDrawer.hidden));
 previousClose.addEventListener("click", () => setPreviousOpen(false));
-
-// EXPERIMENT: Touch gesture reveals the local previous-track strip without cancelling scrolling.
-pageShell.addEventListener(
-  "touchstart",
-  (event) => {
-    if (event.touches.length !== 1) return;
-    const touch = event.touches[0];
-    touchStart = { x: touch.clientX, y: touch.clientY };
-  },
-  { passive: true }
-);
-
-pageShell.addEventListener(
-  "touchend",
-  (event) => {
-    if (!touchStart || event.changedTouches.length !== 1) return;
-    const touch = event.changedTouches[0];
-    const horizontal = touch.clientX - touchStart.x;
-    const vertical = touch.clientY - touchStart.y;
-    touchStart = null;
-    if (vertical < -64 && Math.abs(horizontal) < 48) setPreviousOpen(true);
-  },
-  { passive: true }
-);
 
 function canUseIdleState() {
   return finePointer.matches && !reducedMotion.matches && !document.hidden;
