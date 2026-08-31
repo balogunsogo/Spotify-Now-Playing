@@ -20,7 +20,7 @@ const ambientLayers = [
   document.querySelector("#ambient-layer-a"),
   document.querySelector("#ambient-layer-b")
 ];
-const pollIntervalMs = 12000;
+const pollIntervalMs = 10000;
 const lagosTimeFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Africa/Lagos",
   hour: "2-digit",
