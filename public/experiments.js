@@ -113,8 +113,27 @@ function renderRecentTracks(tracks) {
   tracks.forEach((track) => previousList.append(createRecentTrackNode(track)));
 }
 
+function renderRecentTrackSkeletons() {
+  previousList.replaceChildren();
+  previousList.setAttribute("aria-busy", "true");
+
+  for (let index = 0; index < MAX_RECENT_TRACKS; index += 1) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "previous-track previous-track-skeleton";
+    skeleton.setAttribute("aria-hidden", "true");
+    skeleton.innerHTML = `
+      <span class="previous-skeleton-art"></span>
+      <span class="previous-skeleton-copy">
+        <span></span>
+        <span></span>
+      </span>
+    `;
+    previousList.append(skeleton);
+  }
+}
+
 async function loadRecentTracks() {
-  previousList.textContent = "Loading...";
+  renderRecentTrackSkeletons();
 
   try {
     const response = await fetch(`/api/spotify/recent?t=${Date.now()}`, { cache: "no-store" });
@@ -130,6 +149,8 @@ async function loadRecentTracks() {
     renderRecentTracks(tracks);
   } catch {
     previousList.textContent = "Could not load previous tracks.";
+  } finally {
+    previousList.removeAttribute("aria-busy");
   }
 }
 

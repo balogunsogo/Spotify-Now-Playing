@@ -285,6 +285,51 @@ body[data-playback-state="offline"] .ambient-grain {
   font-size: 0.84rem;
 }
 
+.previous-track-skeleton {
+  pointer-events: none;
+}
+
+.previous-skeleton-art,
+.previous-skeleton-copy span {
+  position: relative;
+  overflow: hidden;
+  background: rgba(245, 243, 238, 0.08);
+}
+
+.previous-skeleton-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+}
+
+.previous-skeleton-copy {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.previous-skeleton-copy span {
+  display: block;
+  width: 82%;
+  height: 0.72rem;
+  border-radius: 2px;
+}
+
+.previous-skeleton-copy span:last-child {
+  width: 56%;
+  height: 0.56rem;
+}
+
+.previous-skeleton-art::after,
+.previous-skeleton-copy span::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(245, 243, 238, 0.1), transparent);
+  transform: translateX(-100%);
+  animation: experimental-skeleton-shimmer 1.35s ease-in-out infinite;
+  content: "";
+}
+
 /* EXPERIMENT: Reversible status double-click afterglow */
 .is-afterglow .ambient-grain {
   opacity: 0.34;
@@ -319,6 +364,12 @@ body[data-playback-state="offline"] .ambient-grain {
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+@keyframes experimental-skeleton-shimmer {
+  to {
+    transform: translateX(100%);
   }
 }
 
@@ -390,7 +441,9 @@ body[data-playback-state="offline"] .ambient-grain {
   }
 
   .title-word,
-  .previous-drawer {
+  .previous-drawer,
+  .previous-skeleton-art::after,
+  .previous-skeleton-copy span::after {
     animation: none !important;
   }
 }
