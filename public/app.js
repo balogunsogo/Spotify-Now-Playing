@@ -48,6 +48,7 @@ let sceneCleanupTimer = null;
 let tiltFrame = null;
 let tiltBounds = null;
 let scrollResetFrame = null;
+let pagePositionSettleTimer = null;
 let isPageActive = false;
 const tilt = {
   currentX: 0,
@@ -576,23 +577,39 @@ async function pollTrack(generation = pollGeneration) {
   }
 }
 
-function resetDocumentScroll() {
-  const reset = () => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  };
+function resetPagePosition() {
+  window.scrollTo(0, 0);
+  if (document.scrollingElement) {
+    document.scrollingElement.scrollTop = 0;
+    document.scrollingElement.scrollLeft = 0;
+  }
+  document.documentElement.scrollTop = 0;
+  document.documentElement.scrollLeft = 0;
+  document.body.scrollTop = 0;
+  document.body.scrollLeft = 0;
+}
 
+function schedulePagePositionReset() {
   if (scrollResetFrame !== null) window.cancelAnimationFrame(scrollResetFrame);
-  reset();
+  window.clearTimeout(pagePositionSettleTimer);
+
+  resetPagePosition();
   scrollResetFrame = window.requestAnimationFrame(() => {
     scrollResetFrame = null;
-    reset();
+    resetPagePosition();
   });
+  pagePositionSettleTimer = window.setTimeout(() => {
+    pagePositionSettleTimer = null;
+    resetPagePosition();
+  }, 150);
 }
 
 function suspendPage() {
   document.body.classList.add("is-page-hidden");
+  if (scrollResetFrame !== null) window.cancelAnimationFrame(scrollResetFrame);
+  window.clearTimeout(pagePositionSettleTimer);
+  scrollResetFrame = null;
+  pagePositionSettleTimer = null;
   if (!isPageActive) return;
 
   isPageActive = false;
@@ -604,13 +621,11 @@ function suspendPage() {
   clockTimer = null;
   activeRequest?.abort();
   resetArtworkDepth(true);
-  if (scrollResetFrame !== null) window.cancelAnimationFrame(scrollResetFrame);
-  scrollResetFrame = null;
 }
 
 function resumePage() {
+  schedulePagePositionReset();
   document.body.classList.remove("is-page-hidden");
-  resetDocumentScroll();
   if (isPageActive) return;
 
   isPageActive = true;
