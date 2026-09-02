@@ -2,7 +2,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getListeningStatus } from "./lib/spotify.js";
+import { getListeningStatus, getRecentlyPlayed } from "./lib/spotify.js";
 import spotifyCallback from "./api/spotify/callback.js";
 import spotifyLogin from "./api/spotify/login.js";
 
@@ -121,7 +121,12 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (request.url?.startsWith("/api/spotify")) {
+    if (pathname === "/api/spotify/recent") {
+      sendJson(response, 200, { tracks: await getRecentlyPlayed(5) });
+      return;
+    }
+
+    if (pathname === "/api/spotify") {
       sendJson(response, 200, await getListeningStatus());
       return;
     }

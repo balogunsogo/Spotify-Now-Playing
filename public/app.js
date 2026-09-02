@@ -41,6 +41,7 @@ let ambientLayerIndex = 0;
 let sceneGeneration = 0;
 let pendingScene = null;
 let cancelArtworkPreload = null;
+let ambientCleanupTimer = null;
 let sceneMidpointTimer = null;
 let sceneCleanupTimer = null;
 let tiltFrame = null;
@@ -163,6 +164,15 @@ function activateAmbientScene(preparedAmbient, shouldBloom) {
   nextLayer.classList.add("is-active");
   currentLayer.classList.remove("is-active");
   ambientLayerIndex = nextIndex;
+
+  window.clearTimeout(ambientCleanupTimer);
+  ambientCleanupTimer = window.setTimeout(() => {
+    if (!currentLayer.classList.contains("is-active")) {
+      currentLayer.style.backgroundImage = "none";
+      currentLayer.style.setProperty("--ambient-artwork", "none");
+    }
+    ambientCleanupTimer = null;
+  }, reducedMotion.matches ? 0 : 900);
 }
 
 function extractPalette(imageUrl, sourceImage) {
@@ -285,9 +295,6 @@ function renderArtworkDepth() {
   artWrap.style.setProperty("--tilt-x", `${tilt.currentX.toFixed(3)}deg`);
   artWrap.style.setProperty("--tilt-y", `${tilt.currentY.toFixed(3)}deg`);
   artWrap.style.setProperty("--art-lift", `${tilt.currentLift.toFixed(3)}px`);
-  artWrap.style.setProperty("--shadow-x", `${(-tilt.currentY * 2.4).toFixed(2)}px`);
-  artWrap.style.setProperty("--shadow-y", `${(24 + tilt.currentX * 1.6).toFixed(2)}px`);
-  artWrap.style.setProperty("--shadow-blur", `${(60 + Math.abs(tilt.currentX + tilt.currentY) * 2).toFixed(2)}px`);
   artWrap.style.setProperty("--reflection-shift", `${(tilt.currentY * 8).toFixed(2)}%`);
   artWrap.style.setProperty("--reflection-opacity", `${(0.12 + Math.abs(tilt.currentY) * 0.035).toFixed(3)}`);
 
@@ -323,9 +330,6 @@ function resetArtworkDepth(immediate = false) {
     artWrap.style.setProperty("--tilt-x", "0deg");
     artWrap.style.setProperty("--tilt-y", "0deg");
     artWrap.style.setProperty("--art-lift", "0px");
-    artWrap.style.setProperty("--shadow-x", "0px");
-    artWrap.style.setProperty("--shadow-y", "24px");
-    artWrap.style.setProperty("--shadow-blur", "60px");
     return;
   }
 
@@ -343,8 +347,8 @@ artWrap.addEventListener("pointermove", (event) => {
   if (!canUseArtworkDepth() || !tiltBounds) return;
   const horizontal = (event.clientX - tiltBounds.left) / tiltBounds.width - 0.5;
   const vertical = (event.clientY - tiltBounds.top) / tiltBounds.height - 0.5;
-  tilt.targetX = Math.max(-3.2, Math.min(3.2, vertical * -6.4));
-  tilt.targetY = Math.max(-3.2, Math.min(3.2, horizontal * 6.4));
+  tilt.targetX = Math.max(-6.4, Math.min(6.4, vertical * -12.8));
+  tilt.targetY = Math.max(-6.4, Math.min(6.4, horizontal * 12.8));
   requestArtworkDepthFrame();
 });
 
