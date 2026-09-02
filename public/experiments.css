@@ -228,7 +228,6 @@ body[data-playback-state="offline"] .ambient-grain {
     transform 180ms var(--ease-cinematic);
 }
 
-.previous-track:hover,
 .previous-track:focus-visible {
   opacity: 1;
   transform: translateY(-2px);
@@ -259,7 +258,6 @@ body[data-playback-state="offline"] .ambient-grain {
   transition: opacity 180ms ease;
 }
 
-.previous-track:hover .previous-track-copy,
 .previous-track:focus-visible .previous-track-copy {
   opacity: 0.92;
 }
@@ -377,9 +375,20 @@ body[data-playback-state="offline"] .ambient-grain {
   }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .previous-track:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  .previous-track:hover .previous-track-copy {
+    opacity: 0.92;
+  }
+}
+
 @media (max-width: 720px) {
   .previous-drawer {
-    bottom: calc(4.2rem + env(safe-area-inset-bottom, 0px) + var(--mobile-viewport-bottom-offset));
+    bottom: calc(4.2rem + env(safe-area-inset-bottom, 0px));
     width: min(560px, calc(100vw - 1.2rem));
     padding: 0.82rem;
     border-radius: 8px;
