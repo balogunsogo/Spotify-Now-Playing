@@ -7,6 +7,7 @@ const lagosTimeEl = document.querySelector("#lagos-time");
 const aboutToggle = document.querySelector("#about-toggle");
 const aboutPopover = document.querySelector("#about-popover");
 const modalScrim = document.querySelector("#modal-scrim");
+const siteFooter = document.querySelector(".site-footer");
 const artWrap = document.querySelector(".art-wrap");
 let albumArt = document.querySelector("#album-art");
 const artFallback = document.querySelector("#art-fallback");
@@ -46,6 +47,9 @@ let sceneMidpointTimer = null;
 let sceneCleanupTimer = null;
 let tiltFrame = null;
 let tiltBounds = null;
+let viewportFrame = null;
+let viewportSettleTimer = null;
+const mobileViewport = window.matchMedia("(max-width: 720px)");
 const tilt = {
   currentX: 0,
   currentY: 0,
@@ -68,6 +72,45 @@ function scheduleLagosClock() {
   updateLagosTime();
   const delayUntilNextMinute = 60000 - (Date.now() % 60000) + 50;
   clockTimer = window.setTimeout(scheduleLagosClock, delayUntilNextMinute);
+}
+
+function updateMobileViewportOffset() {
+  if (viewportFrame !== null) window.cancelAnimationFrame(viewportFrame);
+
+  viewportFrame = window.requestAnimationFrame(() => {
+    viewportFrame = null;
+    const visualViewport = window.visualViewport;
+
+    if (!mobileViewport.matches || !visualViewport) {
+      document.documentElement.style.setProperty("--mobile-viewport-bottom-offset", "0px");
+      return;
+    }
+
+    const currentOffset =
+      Number.parseFloat(
+        document.documentElement.style.getPropertyValue("--mobile-viewport-bottom-offset")
+      ) || 0;
+    const footerBottom = Number.parseFloat(window.getComputedStyle(siteFooter).bottom) || 0;
+    const baseBottom = Math.max(0, footerBottom - currentOffset);
+    const footerRect = siteFooter.getBoundingClientRect();
+    const visualBottom = visualViewport.offsetTop + visualViewport.height;
+    const footerBottomWithoutCorrection = footerRect.bottom + currentOffset;
+    const nextOffset = Math.max(
+      0,
+      Math.ceil(footerBottomWithoutCorrection - (visualBottom - baseBottom))
+    );
+
+    document.documentElement.style.setProperty(
+      "--mobile-viewport-bottom-offset",
+      `${nextOffset}px`
+    );
+  });
+}
+
+function settleMobileViewport() {
+  updateMobileViewportOffset();
+  window.clearTimeout(viewportSettleTimer);
+  viewportSettleTimer = window.setTimeout(updateMobileViewportOffset, 250);
 }
 
 function setPlaybackState(state) {
@@ -585,9 +628,13 @@ function updatePageVisibility() {
     clockTimer = null;
     activeRequest?.abort();
     resetArtworkDepth(true);
+    window.clearTimeout(viewportSettleTimer);
+    if (viewportFrame !== null) window.cancelAnimationFrame(viewportFrame);
+    viewportFrame = null;
     return;
   }
 
+  settleMobileViewport();
   scheduleLagosClock();
   pollTrack();
 }
@@ -612,4 +659,10 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("visibilitychange", updatePageVisibility);
+window.addEventListener("pageshow", settleMobileViewport);
+window.addEventListener("resize", settleMobileViewport, { passive: true });
+window.addEventListener("orientationchange", settleMobileViewport, { passive: true });
+window.visualViewport?.addEventListener("resize", updateMobileViewportOffset, { passive: true });
+window.visualViewport?.addEventListener("scroll", updateMobileViewportOffset, { passive: true });
+mobileViewport.addEventListener("change", settleMobileViewport);
 updatePageVisibility();

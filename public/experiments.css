@@ -112,11 +112,15 @@ body[data-playback-state="offline"] .ambient-grain {
 }
 
 .artist {
-  letter-spacing: 0.025em;
+  letter-spacing: 0;
 }
 
 .album {
-  letter-spacing: 0.11em;
+  letter-spacing: 0.04em;
+}
+
+.status {
+  letter-spacing: 0;
 }
 
 .track-copy {

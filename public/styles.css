@@ -722,6 +722,10 @@ body.is-page-hidden .equalizer span {
     transform: translateZ(0);
   }
 
+  .site-footer .info-button:hover {
+    transform: translateY(-1px) scale(1.02) translateZ(0);
+  }
+
   .about-wrap {
     grid-column: 1;
     justify-self: start;
