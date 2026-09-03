@@ -175,7 +175,7 @@ body[data-playback-state="offline"] .ambient-grain {
   padding: 1.08rem;
   border: 1px solid rgba(245, 243, 238, 0.11);
   border-radius: 10px;
-  background: rgba(8, 8, 8, 0.82);
+  background: rgba(8, 8, 8, 0.94);
   box-shadow: 0 22px 72px rgba(0, 0, 0, 0.52);
   transform: translateX(-50%);
   animation: experimental-drawer-in 280ms var(--ease-cinematic) both;

@@ -563,7 +563,7 @@ body.is-page-hidden .equalizer span {
   position: fixed;
   inset: 0;
   z-index: 19;
-  background: rgba(0, 0, 0, 0.12);
+  background: transparent;
 }
 
 @keyframes bounce {
