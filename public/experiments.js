@@ -54,7 +54,10 @@ function revealTitle(track, trackChanged) {
   });
 
   titleEl.classList.add("is-word-revealing");
-  titleRevealTimer = window.setTimeout(() => titleEl.classList.remove("is-word-revealing"), 760);
+  titleRevealTimer = window.setTimeout(() => {
+    titleEl.classList.remove("is-word-revealing");
+    titleRevealTimer = null;
+  }, 760);
 }
 
 function trackIdentity(track) {
@@ -178,16 +181,19 @@ function scheduleOfflineStatusUpdates() {
   offlineStatusTimer = window.setTimeout(scheduleOfflineStatusUpdates, 30000);
 }
 
-function updateExperimentVisibility() {
-  if (document.hidden) {
-    stopOfflineStatusUpdates();
-    return;
-  }
-
+function resumeExperimentTimers() {
   scheduleOfflineStatusUpdates();
 }
 
-document.addEventListener("visibilitychange", updateExperimentVisibility);
+function suspendExperimentTimers() {
+  stopOfflineStatusUpdates();
+  window.clearTimeout(titleRevealTimer);
+  titleRevealTimer = null;
+  titleEl.classList.remove("is-word-revealing");
+}
+
+window.addEventListener("spotify:page-resume", resumeExperimentTimers);
+window.addEventListener("spotify:page-suspend", suspendExperimentTimers);
 
 // EXPERIMENT: Easter egg. Double-click the status to toggle a restrained afterglow.
 presenceBadge.addEventListener("dblclick", () => {

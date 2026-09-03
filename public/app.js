@@ -47,8 +47,6 @@ let sceneMidpointTimer = null;
 let sceneCleanupTimer = null;
 let tiltFrame = null;
 let tiltBounds = null;
-let scrollResetFrame = null;
-let pagePositionSettleTimer = null;
 let isPageActive = false;
 const tilt = {
   currentX: 0,
@@ -577,39 +575,8 @@ async function pollTrack(generation = pollGeneration) {
   }
 }
 
-function resetPagePosition() {
-  window.scrollTo(0, 0);
-  if (document.scrollingElement) {
-    document.scrollingElement.scrollTop = 0;
-    document.scrollingElement.scrollLeft = 0;
-  }
-  document.documentElement.scrollTop = 0;
-  document.documentElement.scrollLeft = 0;
-  document.body.scrollTop = 0;
-  document.body.scrollLeft = 0;
-}
-
-function schedulePagePositionReset() {
-  if (scrollResetFrame !== null) window.cancelAnimationFrame(scrollResetFrame);
-  window.clearTimeout(pagePositionSettleTimer);
-
-  resetPagePosition();
-  scrollResetFrame = window.requestAnimationFrame(() => {
-    scrollResetFrame = null;
-    resetPagePosition();
-  });
-  pagePositionSettleTimer = window.setTimeout(() => {
-    pagePositionSettleTimer = null;
-    resetPagePosition();
-  }, 150);
-}
-
 function suspendPage() {
   document.body.classList.add("is-page-hidden");
-  if (scrollResetFrame !== null) window.cancelAnimationFrame(scrollResetFrame);
-  window.clearTimeout(pagePositionSettleTimer);
-  scrollResetFrame = null;
-  pagePositionSettleTimer = null;
   if (!isPageActive) return;
 
   isPageActive = false;
@@ -617,22 +584,25 @@ function suspendPage() {
   cancelPendingScene();
   window.clearTimeout(pollTimer);
   window.clearTimeout(clockTimer);
+  window.clearTimeout(ambientCleanupTimer);
   pollTimer = null;
   clockTimer = null;
+  ambientCleanupTimer = null;
   activeRequest?.abort();
   resetArtworkDepth(true);
+  window.dispatchEvent(new CustomEvent("spotify:page-suspend"));
 }
 
 function resumePage() {
-  schedulePagePositionReset();
   document.body.classList.remove("is-page-hidden");
-  if (isPageActive) return;
+  if (document.hidden || isPageActive) return;
 
   isPageActive = true;
   cancelPendingScene();
   const generation = ++pollGeneration;
   scheduleLagosClock();
   void pollTrack(generation);
+  window.dispatchEvent(new CustomEvent("spotify:page-resume"));
 }
 
 function updatePageVisibility() {
@@ -641,6 +611,12 @@ function updatePageVisibility() {
   } else {
     resumePage();
   }
+}
+
+function handlePageShow(event) {
+  // A bfcache restore follows pagehide; the active-state guard deduplicates it
+  // from a nearly simultaneous visibilitychange event.
+  if (event.persisted || !isPageActive) resumePage();
 }
 
 aboutToggle.addEventListener("click", () => {
@@ -664,4 +640,5 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("visibilitychange", updatePageVisibility);
 window.addEventListener("pagehide", suspendPage);
-window.addEventListener("pageshow", resumePage);
+window.addEventListener("pageshow", handlePageShow);
+updatePageVisibility();
