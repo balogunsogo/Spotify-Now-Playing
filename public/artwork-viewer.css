@@ -1,0 +1,178 @@
+/* Touch artwork + fullscreen viewer. Coarse pointers only, so fine-pointer desktops never match these rules. */
+
+@media (pointer: coarse) {
+  /* EXPERIMENT: Touch artwork depth. Separate variables keep the desktop depth loop from touching this transform. */
+  .art-wrap {
+    --touch-tilt-x: 0deg;
+    --touch-tilt-y: 0deg;
+    --touch-press: 1;
+    --touch-depth-scale: 1;
+    --touch-reflection-shift: 0%;
+    --touch-reflection-opacity: 0.12;
+    transform:
+      perspective(calc(900px * var(--touch-depth-scale)))
+      rotateX(var(--touch-tilt-x))
+      rotateY(var(--touch-tilt-y))
+      scale(var(--touch-press));
+    will-change: transform;
+    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* When the page cannot scroll, vertical finger movement is free to drive the tilt. */
+  .art-wrap.is-tilt-exclusive {
+    touch-action: none;
+    touch-action: pinch-zoom;
+  }
+
+  .art-wrap img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .art-wrap .art-reflection {
+    opacity: var(--touch-reflection-opacity);
+    transform: translate3d(var(--touch-reflection-shift), 0, 0);
+  }
+
+  .art-wrap:focus {
+    outline: none;
+  }
+
+  .art-wrap:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+  }
+
+  html.is-art-viewing,
+  html.is-art-viewing body {
+    overflow: hidden;
+  }
+
+  /* EXPERIMENT: Fullscreen artwork viewer */
+  .art-viewer {
+    --viewer-safe-x: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --viewer-safe-y: max(env(safe-area-inset-top, 0px), env(safe-area-inset-bottom, 0px));
+    --viewer-height: 100vh;
+    --viewer-gutter: 1rem;
+    --viewer-control-space: 4.25rem;
+    /* Largest centered square that keeps the close control clear, either above it (portrait) or beside it (landscape). */
+    --viewer-size: min(
+      max(
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-gutter))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-control-space)))
+        ),
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-control-space))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-gutter)))
+        )
+      ),
+      64rem
+    );
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    overscroll-behavior: contain;
+    touch-action: none;
+  }
+
+  @supports (height: 100dvh) {
+    .art-viewer {
+      --viewer-height: 100dvh;
+    }
+  }
+
+  .art-viewer:focus {
+    outline: none;
+  }
+
+  .art-viewer[hidden] {
+    display: none;
+  }
+
+  .art-viewer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    opacity: 0;
+  }
+
+  .art-viewer-frame {
+    position: relative;
+    z-index: 1;
+    width: var(--viewer-size);
+    aspect-ratio: 1;
+    transform-origin: 50% 50%;
+  }
+
+  .art-viewer-frame > .art-wrap {
+    width: 100%;
+  }
+
+  .art-viewer-close {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 0.9rem);
+    left: calc(env(safe-area-inset-left, 0px) + 0.9rem);
+    z-index: 2;
+    width: 2.75rem;
+    height: 2.75rem;
+    opacity: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .art-viewer.is-open .art-viewer-backdrop,
+  .art-viewer.is-open .art-viewer-close {
+    opacity: 1;
+  }
+
+  .art-viewer:not(.is-open) .art-viewer-close {
+    pointer-events: none;
+  }
+
+  .art-viewer-close-icon {
+    position: relative;
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .art-viewer-close-icon::before,
+  .art-viewer-close-icon::after {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.35px;
+    border-radius: 1px;
+    background: currentColor;
+    content: "";
+  }
+
+  .art-viewer-close-icon::before {
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .art-viewer-close-icon::after {
+    transform: translateY(-50%) rotate(-45deg);
+  }
+
+  /* The artwork leaves #player while expanded, so mirror its playback-state treatment to avoid a visual jump. */
+  body[data-playback-state="paused"] .art-viewer .art-wrap,
+  body[data-playback-state="offline"] .art-viewer .art-wrap {
+    filter: saturate(0.78) brightness(0.92);
+    --shadow-y: 20px;
+    --shadow-blur: 52px;
+  }
+
+  body[data-playback-state="paused"] .art-viewer .art-reflection,
+  body[data-playback-state="offline"] .art-viewer .art-reflection {
+    opacity: 0.04;
+  }
+}
