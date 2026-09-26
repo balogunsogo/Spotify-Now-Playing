@@ -5,11 +5,15 @@
   .art-wrap {
     --touch-tilt-x: 0deg;
     --touch-tilt-y: 0deg;
+    --touch-shift-x: 0%;
+    --touch-shift-y: 0%;
     --touch-press: 1;
     --touch-depth-scale: 1;
     --touch-reflection-shift: 0%;
     --touch-reflection-opacity: 0.12;
+    /* Shift is a % of the artwork's own size, so it survives the move between page and fullscreen unchanged. */
     transform:
+      translate3d(var(--touch-shift-x), var(--touch-shift-y), 0)
       perspective(calc(900px * var(--touch-depth-scale)))
       rotateX(var(--touch-tilt-x))
       rotateY(var(--touch-tilt-y))
@@ -80,7 +84,9 @@
     display: grid;
     place-items: center;
     overscroll-behavior: contain;
+    /* One finger belongs to the artwork; two-finger pinch-zoom stays with the browser. */
     touch-action: none;
+    touch-action: pinch-zoom;
   }
 
   @supports (height: 100dvh) {
