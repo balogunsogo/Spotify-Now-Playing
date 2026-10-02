@@ -1,3 +1,4 @@
+/* ==================== STYLES ==================== */
 :root {
   color-scheme: dark;
   --bg: #050505;
@@ -842,5 +843,678 @@ body.is-page-hidden .equalizer span {
     height: 5px;
     transform: none;
     animation: none !important;
+  }
+}
+
+
+/* ==================== EXPERIMENTS ==================== */
+/* Experimental layers are intentionally grouped in this section for easy removal. */
+
+:root {
+  --base-rgb: 22, 22, 24;
+}
+
+/* EXPERIMENT: Ambient background */
+.ambient-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    repeating-radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.035) 0 0.45px, transparent 0.7px 3px),
+    repeating-linear-gradient(112deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 4px);
+  background-size: 4px 4px, 7px 7px;
+  mix-blend-mode: soft-light;
+  opacity: 0.22;
+}
+
+.ambient-shade {
+  z-index: 3;
+}
+
+body[data-playback-state="paused"] .ambient-grain,
+body[data-playback-state="offline"] .ambient-grain {
+  opacity: 0.12;
+}
+
+/* EXPERIMENT: Artwork depth and reflection */
+.art-wrap {
+  --art-lift: 0px;
+  --reflection-shift: 0%;
+  --reflection-opacity: 0.12;
+  transform:
+    translate3d(0, var(--art-lift), 0)
+    perspective(900px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+}
+
+.art-reflection {
+  position: absolute;
+  inset: -35% -65%;
+  z-index: 4;
+  background: linear-gradient(
+    108deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.03) 43%,
+    rgba(255, 255, 255, 0.18) 49%,
+    rgba(255, 255, 255, 0.035) 55%,
+    transparent 64%
+  );
+  opacity: var(--reflection-opacity);
+  transform: translate3d(var(--reflection-shift), 0, 0);
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+
+.player.is-paused .art-reflection,
+.player.is-offline .art-reflection {
+  opacity: 0.04;
+}
+
+/* EXPERIMENT: Staged track arrival */
+.track-copy,
+.art-stage {
+  transition:
+    opacity 180ms ease,
+    filter 220ms ease,
+    transform 260ms var(--ease-cinematic);
+}
+
+.player.is-departing .track-copy {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(-5px);
+}
+
+.player.is-departing .art-stage {
+  opacity: 0;
+  filter: saturate(0.72);
+  animation: none;
+  transform: translateY(4px) scale(0.975);
+}
+
+/* EXPERIMENT: Editorial typography */
+.song-title {
+  font-size: clamp(1.48rem, 4.2vw, 2.05rem);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.song-title.is-short-title {
+  max-width: min(18ch, 100%);
+  font-size: clamp(1.85rem, 5.3vw, 2.55rem);
+  line-height: 0.9;
+}
+
+.song-title.is-long-title {
+  max-width: min(27ch, 100%);
+  font-size: clamp(1.2rem, 3.15vw, 1.58rem);
+  line-height: 1;
+}
+
+.title-word {
+  display: inline-block;
+}
+
+.is-word-revealing .title-word {
+  animation: experimental-word-reveal 420ms var(--ease-cinematic) both;
+  animation-delay: calc(var(--word-index) * 26ms + 60ms);
+}
+
+.artist {
+  letter-spacing: 0;
+}
+
+.album {
+  letter-spacing: 0.04em;
+}
+
+.status {
+  letter-spacing: 0;
+}
+
+.track-copy {
+  gap: 0.28rem;
+}
+
+.actions {
+  margin-top: 0.52rem;
+}
+
+/* EXPERIMENT: Local previous-track drawer */
+.previous-toggle {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.previous-toggle[aria-expanded="true"] {
+  border-color: var(--text);
+  color: var(--text);
+  background: rgba(245, 243, 238, 0.1);
+}
+
+.previous-toggle .history-icon {
+  position: relative;
+  display: block;
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 1.35px solid currentColor;
+  border-left-color: transparent;
+  border-radius: 50%;
+  transform: translateY(-0.01em) rotate(-32deg);
+}
+
+.previous-toggle .history-icon::before {
+  position: absolute;
+  top: -0.16rem;
+  left: -0.13rem;
+  width: 0;
+  height: 0;
+  border-top: 0.18rem solid transparent;
+  border-bottom: 0.18rem solid transparent;
+  border-right: 0.25rem solid currentColor;
+  content: "";
+}
+
+.previous-drawer {
+  position: fixed;
+  z-index: 28;
+  left: 50%;
+  bottom: clamp(3.5rem, 7vh, 5rem);
+  width: min(750px, calc(100vw - 3rem));
+  padding: 1.08rem;
+  border: 1px solid rgba(245, 243, 238, 0.11);
+  border-radius: 10px;
+  background: rgba(8, 8, 8, 0.94);
+  box-shadow: 0 22px 72px rgba(0, 0, 0, 0.52);
+  transform: translateX(-50%);
+  animation: experimental-drawer-in 280ms var(--ease-cinematic) both;
+}
+
+.previous-drawer[hidden] {
+  display: none;
+}
+
+.previous-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.87rem;
+  color: rgba(245, 243, 238, 0.66);
+  font-size: 0.87rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.previous-drawer-head button {
+  border: 0;
+  padding: 0.16rem 0.22rem;
+  color: rgba(245, 243, 238, 0.5);
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.previous-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.82rem;
+}
+
+.previous-track {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0.5rem;
+  padding: 0;
+  border-radius: 3px;
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms var(--ease-cinematic);
+}
+
+.previous-track:focus-visible {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.previous-track img,
+.previous-art-fallback {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.previous-art-fallback {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(var(--base-rgb), 0.9);
+  font-size: 0.98rem;
+}
+
+.previous-track-copy {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+  opacity: 0.58;
+  transition: opacity 180ms ease;
+}
+
+.previous-track:focus-visible .previous-track-copy {
+  opacity: 0.92;
+}
+
+.previous-track strong,
+.previous-track small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previous-track strong {
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+
+.previous-track small {
+  color: rgba(245, 243, 238, 0.46);
+  font-size: 0.72rem;
+}
+
+.previous-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.05rem 0.3rem;
+  color: rgba(245, 243, 238, 0.46);
+  font-size: 0.84rem;
+}
+
+.previous-track-skeleton {
+  pointer-events: none;
+}
+
+.previous-skeleton-art,
+.previous-skeleton-copy span {
+  position: relative;
+  overflow: hidden;
+  background: rgba(245, 243, 238, 0.08);
+}
+
+.previous-skeleton-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+}
+
+.previous-skeleton-copy {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.previous-skeleton-copy span {
+  display: block;
+  width: 82%;
+  height: 0.72rem;
+  border-radius: 2px;
+}
+
+.previous-skeleton-copy span:last-child {
+  width: 56%;
+  height: 0.56rem;
+}
+
+.previous-skeleton-art::after,
+.previous-skeleton-copy span::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(245, 243, 238, 0.1), transparent);
+  transform: translateX(-100%);
+  animation: experimental-skeleton-shimmer 1.35s ease-in-out infinite;
+  content: "";
+}
+
+/* EXPERIMENT: Reversible status double-click afterglow */
+.is-afterglow .ambient-grain {
+  opacity: 0.34;
+}
+
+.is-afterglow .art-wrap {
+  box-shadow:
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) rgba(0, 0, 0, 0.44),
+    0 0 72px rgba(var(--accent-rgb), 0.12);
+}
+
+@keyframes experimental-word-reveal {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(0.72em);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes experimental-drawer-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes experimental-skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .previous-track:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  .previous-track:hover .previous-track-copy {
+    opacity: 0.92;
+  }
+}
+
+@media (max-width: 720px) {
+  .previous-drawer {
+    bottom: calc(4.2rem + env(safe-area-inset-bottom, 0px));
+    width: min(560px, calc(100vw - 1.2rem));
+    padding: 0.82rem;
+    border-radius: 8px;
+  }
+
+  .previous-drawer-head {
+    margin-bottom: 0.68rem;
+    font-size: 0.7rem;
+  }
+
+  .previous-drawer-head button {
+    font-size: 0.62rem;
+  }
+
+  .previous-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 118px;
+    gap: 0.65rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .previous-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .previous-track {
+    gap: 0.4rem;
+  }
+
+  .previous-track strong {
+    font-size: 0.72rem;
+  }
+
+  .previous-track small {
+    font-size: 0.58rem;
+  }
+
+  .track-copy {
+    gap: 0.22rem;
+  }
+
+  .actions {
+    margin-top: 0.42rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .song-title.is-short-title {
+    font-size: clamp(1.68rem, 8.8vw, 2.2rem);
+  }
+
+  .song-title.is-long-title {
+    font-size: clamp(1.12rem, 5.4vw, 1.42rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-reflection {
+    display: none;
+  }
+
+  .title-word,
+  .previous-drawer,
+  .previous-skeleton-art::after,
+  .previous-skeleton-copy span::after {
+    animation: none !important;
+  }
+}
+
+
+/* ==================== ARTWORK-VIEWER ==================== */
+/* Touch artwork + fullscreen viewer. Coarse pointers only, so fine-pointer desktops never match these rules. */
+
+@media (pointer: coarse) {
+  /* EXPERIMENT: Touch artwork depth. Separate variables keep the desktop depth loop from touching this transform. */
+  .art-wrap {
+    --touch-tilt-x: 0deg;
+    --touch-tilt-y: 0deg;
+    --touch-shift-x: 0%;
+    --touch-shift-y: 0%;
+    --touch-press: 1;
+    --touch-depth-scale: 1;
+    --touch-reflection-shift: 0%;
+    --touch-reflection-opacity: 0.12;
+    /* Shift is a % of the artwork's own size, so it survives the move between page and fullscreen unchanged. */
+    transform:
+      translate3d(var(--touch-shift-x), var(--touch-shift-y), 0)
+      perspective(calc(900px * var(--touch-depth-scale)))
+      rotateX(var(--touch-tilt-x))
+      rotateY(var(--touch-tilt-y))
+      scale(var(--touch-press));
+    will-change: transform;
+    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* When the page cannot scroll, vertical finger movement is free to drive the tilt. */
+  .art-wrap.is-tilt-exclusive {
+    touch-action: none;
+    touch-action: pinch-zoom;
+  }
+
+  .art-wrap img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .art-wrap .art-reflection {
+    opacity: var(--touch-reflection-opacity);
+    transform: translate3d(var(--touch-reflection-shift), 0, 0);
+  }
+
+  .art-wrap:focus {
+    outline: none;
+  }
+
+  .art-wrap:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+  }
+
+  html.is-art-viewing,
+  html.is-art-viewing body {
+    overflow: hidden;
+  }
+
+  /* EXPERIMENT: Fullscreen artwork viewer */
+  .art-viewer {
+    --viewer-safe-x: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --viewer-safe-y: max(env(safe-area-inset-top, 0px), env(safe-area-inset-bottom, 0px));
+    --viewer-height: 100vh;
+    --viewer-gutter: 1rem;
+    --viewer-control-space: 4.25rem;
+    /* Largest centered square that keeps the close control clear, either above it (portrait) or beside it (landscape). */
+    --viewer-size: min(
+      max(
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-gutter))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-control-space)))
+        ),
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-control-space))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-gutter)))
+        )
+      ),
+      64rem
+    );
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    overscroll-behavior: contain;
+    /* One finger belongs to the artwork; two-finger pinch-zoom stays with the browser. */
+    touch-action: none;
+    touch-action: pinch-zoom;
+  }
+
+  @supports (height: 100dvh) {
+    .art-viewer {
+      --viewer-height: 100dvh;
+    }
+  }
+
+  .art-viewer:focus {
+    outline: none;
+  }
+
+  .art-viewer[hidden] {
+    display: none;
+  }
+
+  .art-viewer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    opacity: 0;
+  }
+
+  .art-viewer-frame {
+    position: relative;
+    z-index: 1;
+    width: var(--viewer-size);
+    aspect-ratio: 1;
+    transform-origin: 50% 50%;
+  }
+
+  .art-viewer-frame > .art-wrap {
+    width: 100%;
+  }
+
+  .art-viewer-close {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 0.9rem);
+    left: calc(env(safe-area-inset-left, 0px) + 0.9rem);
+    z-index: 2;
+    width: 2.75rem;
+    height: 2.75rem;
+    opacity: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .art-viewer.is-open .art-viewer-backdrop,
+  .art-viewer.is-open .art-viewer-close {
+    opacity: 1;
+  }
+
+  .art-viewer:not(.is-open) .art-viewer-close {
+    pointer-events: none;
+  }
+
+  .art-viewer-close-icon {
+    position: relative;
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .art-viewer-close-icon::before,
+  .art-viewer-close-icon::after {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.35px;
+    border-radius: 1px;
+    background: currentColor;
+    content: "";
+  }
+
+  .art-viewer-close-icon::before {
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .art-viewer-close-icon::after {
+    transform: translateY(-50%) rotate(-45deg);
+  }
+
+  /* The artwork leaves #player while expanded, so mirror its playback-state treatment to avoid a visual jump. */
+  body[data-playback-state="paused"] .art-viewer .art-wrap,
+  body[data-playback-state="offline"] .art-viewer .art-wrap {
+    filter: saturate(0.78) brightness(0.92);
+    --shadow-y: 20px;
+    --shadow-blur: 52px;
+  }
+
+  body[data-playback-state="paused"] .art-viewer .art-reflection,
+  body[data-playback-state="offline"] .art-viewer .art-reflection {
+    opacity: 0.04;
+  }
+}
+
+/* ==================== COARSE-POINTER HIT AREAS ==================== */
+@media (pointer: coarse) {
+  .info-button:not(.art-viewer-close),
+  .previous-drawer-head button,
+  .spotify-link {
+    position: relative;
+  }
+
+  .info-button:not(.art-viewer-close)::after,
+  .previous-drawer-head button::after,
+  .spotify-link::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+    content: "";
   }
 }
